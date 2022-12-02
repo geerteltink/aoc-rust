@@ -1,0 +1,4 @@
+.*.sw[po]
+target/
+release/
+**/*.rs.bk
