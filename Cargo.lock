@@ -3,6 +3,10 @@
 version = 3
 
 [[package]]
+name = "aoc_2022_day_00"
+version = "0.1.0"
+
+[[package]]
 name = "aoc_2022_day_01"
 version = "0.1.0"
 
@@ -15,13 +19,9 @@ name = "aoc_2022_day_03"
 version = "0.1.0"
 
 [[package]]
-name = "day_00"
+name = "aoc_2022_day_04"
 version = "0.1.0"
 
 [[package]]
-name = "day_04"
-version = "0.1.0"
-
-[[package]]
-name = "day_05"
+name = "aoc_2022_day_05"
 version = "0.1.0"
