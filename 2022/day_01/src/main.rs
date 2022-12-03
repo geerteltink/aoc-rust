@@ -34,7 +34,7 @@ fn calculate_calories_per_elf(content: &String) -> Vec<u32> {
             elfs.push(total_calories);
             total_calories = 0;
         } else {
-            let calories: u32 = line.parse().unwrap();
+            let calories: u32 = line.trim().parse().unwrap();
             total_calories += calories;
         }
     }
