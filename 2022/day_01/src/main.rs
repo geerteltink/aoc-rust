@@ -4,10 +4,10 @@ fn main() {
     let content = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();
 
     let result1 = part_one(&content);
-    println!("Result day {DAY} part one: {result1}");
+    println!("Answer day {DAY} part one: {result1}");
 
     let result2 = part_two(&content);
-    println!("Result day {DAY} part one: {result2}");
+    println!("Answer day {DAY} part one: {result2}");
 }
 
 fn part_one(content: &String) -> u32 {
