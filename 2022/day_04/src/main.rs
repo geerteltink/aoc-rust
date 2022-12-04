@@ -23,15 +23,15 @@ fn part_one(content: &String) -> i32 {
 }
 
 fn part_two(content: &String) -> i32 {
-    let mut full_intersections: i32 = 0;
+    let mut any_intersections: i32 = 0;
     for line in content.lines() {
         let pairs = get_pairs(line);
         if has_any_intersection(pairs) {
-            full_intersections += 1;
+            any_intersections += 1;
         }
     }
 
-    return full_intersections;
+    return any_intersections;
 }
 
 fn get_pairs(sections: &str) -> (Vec<i32>, Vec<i32>) {
