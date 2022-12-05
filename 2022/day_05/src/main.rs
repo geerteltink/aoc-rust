@@ -23,7 +23,7 @@ fn part_one(input: &String) -> String {
     }
 
     let answer = get_top_crates(&stacks);
-    
+
     // stacks become borrowed in here, so we need print them after processing
     //for stack in stacks {
     //    println!("{:?}", stack);
@@ -51,7 +51,7 @@ fn load_crates(cargo: &str) -> Vec<Vec<char>> {
     let num_stacks = cargo.pop().unwrap().split_ascii_whitespace().count();
     // Create a vector now that the number stacks is known
     let mut stacks: Vec<Vec<char>> = vec![Vec::new(); num_stacks];
-    
+
     // Start constructing the stacks from bottom to top
     cargo
         .iter() // Iterate over lines
@@ -65,7 +65,7 @@ fn load_crates(cargo: &str) -> Vec<Vec<char>> {
         })
         .flatten() // flatten structure
         .for_each(|(i, c)| stacks[i].push(c)); // push the value to its corresponding stack
-        
+
     return stacks;
 }
 
