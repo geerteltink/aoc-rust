@@ -1,7 +1,9 @@
 static DAY: &'static str = "05";
+const MOVE_PATTERN: &str = r"move (?P<count>\d+) from (?P<from>\d+) to (?P<to>\d+)";
 
-use core::panic;
+use lazy_static::lazy_static;
 use regex::Regex;
+use core::panic;
 use std::str::FromStr;
 
 fn main() {
@@ -16,8 +18,11 @@ fn main() {
 
 fn part_one(input: &String) -> String {
     let (cargo, actions) = input.split_once("\n\n").unwrap();
+    
+    println!("loading crates");
     let mut stacks = load_crates(&cargo);
 
+    println!("moving crates");
     for action in actions.lines() {
         move_crates(action, &mut stacks, true);
     }
@@ -34,8 +39,11 @@ fn part_one(input: &String) -> String {
 
 fn part_two(input: &String) -> String {
     let (cargo, actions) = input.split_once("\n\n").unwrap();
+    
+    println!("loading crates");
     let mut stacks = load_crates(&cargo);
 
+    println!("moving crates");
     for action in actions.lines() {
         move_crates(action, &mut stacks, false);
     }
@@ -70,13 +78,16 @@ fn load_crates(cargo: &str) -> Vec<Vec<char>> {
 }
 
 fn move_crates(action: &str, stacks: &mut Vec<Vec<char>>, single: bool) {
+    lazy_static! {
+        static ref MOVE_REGEX: Regex = Regex::new(MOVE_PATTERN).unwrap();
+    }
+
     // only handle move actions
-    let re = Regex::new(r"move (?P<count>\d+) from (?P<from>\d+) to (?P<to>\d+)").unwrap();
-    if re.is_match(action) == false {
+    if MOVE_REGEX.is_match(action) == false {
         return;
     }
 
-    let caps = re.captures(action).unwrap();
+    let caps = MOVE_REGEX.captures(action).unwrap();
 
     let count: usize = FromStr::from_str(&caps["count"]).unwrap();
     let from: usize = FromStr::from_str(&caps["from"]).unwrap();
