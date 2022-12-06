@@ -25,7 +25,7 @@ fn part_two(input: &String) -> usize {
 }
 
 fn get_start_of_packet(message: Vec<char>, packet_size: usize) -> usize {
-    let mut count = 0;
+    let mut start = 0;
 
     // get slice of x characters, if smaller than x, it is ignored
     for marker in message.windows(packet_size) {
@@ -33,10 +33,10 @@ fn get_start_of_packet(message: Vec<char>, packet_size: usize) -> usize {
         if marker.iter().all_unique() {
             break;
         }
-        count += 1;
+        start += 1;
     }
 
-    return count + packet_size;
+    return start + packet_size;
 }
 
 #[cfg(test)]
