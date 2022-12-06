@@ -14,25 +14,28 @@ fn main() {
 
 fn part_one(input: &String) -> usize {
     let message = input.chars().collect_vec();
-    
+
     return get_start_of_packet(message, 4);
 }
 
 fn part_two(input: &String) -> usize {
     let message = input.chars().collect_vec();
-    
+
     return get_start_of_packet(message, 14);
 }
 
 fn get_start_of_packet(message: Vec<char>, packet_size: usize) -> usize {
     let mut count = 0;
-    for marker in message.windows(packet_size) { // get slice of x characters, if smaller than x, it is ignored
-        if marker.iter().all_unique() { // check if all characters are unique
+
+    // get slice of x characters, if smaller than x, it is ignored
+    for marker in message.windows(packet_size) {
+        // check if all characters are unique
+        if marker.iter().all_unique() {
             break;
         }
         count += 1;
     }
-    
+
     return count + packet_size;
 }
 
