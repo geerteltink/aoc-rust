@@ -47,11 +47,23 @@ mod tests {
     fn it_returns_the_answer_for_part_one() {
         let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
         assert_eq!(10, part_one(&input));
+        
+        assert_eq!(part_one(&"mjqjpqmgbljsphdztnvjfqwrcgsmlb".to_string()), 7);
+        assert_eq!(part_one(&"bvwbjplbgvbhsrlpgdmjqwftvncz".to_string()), 5);
+        assert_eq!(part_one(&"nppdvjthqldpwncqszvftbrmjlhg".to_string()), 6);
+        assert_eq!(part_one(&"nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string()), 10);
+        assert_eq!(part_one(&"zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string()), 11);
     }
 
     #[test]
     fn it_returns_the_answer_for_part_two() {
         let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
         assert_eq!(29, part_two(&input));
+        
+        assert_eq!(part_two(&"mjqjpqmgbljsphdztnvjfqwrcgsmlb".to_string()), 19);
+        assert_eq!(part_two(&"bvwbjplbgvbhsrlpgdmjqwftvncz".to_string()), 23);
+        assert_eq!(part_two(&"nppdvjthqldpwncqszvftbrmjlhg".to_string()), 23);
+        assert_eq!(part_two(&"nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string()), 29);
+        assert_eq!(part_two(&"zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string()), 26);
     }
 }
