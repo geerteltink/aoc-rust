@@ -1,12 +1,14 @@
-use std::iter::from_fn;
 use defaultmap::DefaultHashMap;
-use derive_more::{AddAssign, SubAssign, Add, Sub, Sum};
-use std::hash::Hash;
+use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
 pub use itertools::Itertools;
+use std::hash::Hash;
+use std::iter::from_fn;
 
 static DAY: &'static str = "08";
 
-#[derive(Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord)]
+#[derive(
+    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
+)]
 struct Pos(isize, isize);
 
 impl Pos {
@@ -17,10 +19,10 @@ impl Pos {
     pub fn y(self) -> isize {
         self.1
     }
-    
+
     pub fn walk(self, unit: Self) -> impl Iterator<Item = Self> {
         let mut pos = self;
-        
+
         return from_fn(move || {
             pos += unit;
             Some(pos)
@@ -66,7 +68,7 @@ fn part_one(input: &String) -> i32 {
             grid[Pos(x as _, y as _)] = c.to_string().parse::<i8>().unwrap();
         }
     }
-    
+
     let mut total_visible = 0;
     for (&pos, &height) in grid.iter() {
         let mut visible_from_outside = false;
@@ -79,15 +81,15 @@ fn part_one(input: &String) -> i32 {
                 visible_from_outside = true;
             }
         }
-        
+
         if visible_from_outside {
             total_visible += 1;
         }
     }
-    
+
     //println!("{:#?}", grid);
     //println!("{:?}", total_visible);
-    
+
     return total_visible;
 }
 
@@ -106,7 +108,7 @@ fn part_two(input: &String) -> usize {
             let visible = pos
                 .walk(direction)
                 .test(|p| grid[p] == -1, |p| grid[p] >= height);
-            
+
             let mut distance = pos
                 .walk(direction)
                 .take_while(|p| grid[p] < height && grid[p] != -1)
@@ -118,13 +120,13 @@ fn part_two(input: &String) -> usize {
 
             scenic_score *= distance;
         }
-        
+
         max = scenic_score.max(max);
     }
-    
+
     //println!("{:#?}", grid);
     //println!("{:?}", total_visible);
-    
+
     return max;
 }
 
