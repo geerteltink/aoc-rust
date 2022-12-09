@@ -65,6 +65,11 @@ dependencies = [
 [[package]]
 name = "aoc_2022_day_09"
 version = "0.1.0"
+dependencies = [
+ "defaultmap",
+ "derive_more",
+ "itertools",
+]
 
 [[package]]
 name = "convert_case"
