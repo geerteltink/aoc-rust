@@ -1,81 +1,7 @@
-use defaultmap::DefaultHashMap;
-use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
-pub use itertools::Itertools;
-use std::hash::Hash;
+use std::{collections::HashSet, fmt::Debug, hash::Hash};
+use Direction::*;
 
 static DAY: &'static str = "09";
-
-#[derive(
-    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
-)]
-struct Pos(isize, isize);
-
-impl Pos {
-    pub fn up(self) -> Self {
-        Self(self.0, self.1 + 1)
-    }
-
-    pub fn down(self) -> Self {
-        Self(self.0, self.1 - 1)
-    }
-    
-    pub fn right(self) -> Self {
-        Self(self.0 + 1, self.1)
-    }
-    
-    pub fn left(self) -> Self {
-        Self(self.0 - 1, self.1)
-    }
-    
-    pub fn follow(self, other: Self, direction: &str) -> Self {
-        let new = self - other;
-        let mut changed = self.clone();
-        
-        match new {
-            Pos(2, -1) => {
-                changed = self.left();
-                changed = changed.up();
-            },
-            Pos(2, 1) => {
-                changed = self.left();
-                changed = changed.down();
-            },
-            Pos(2, _) => changed = self.left(),
-            Pos(-2, -1) => {
-                changed = self.right();
-                changed = changed.up();
-            },
-            Pos(-2, 1) => {
-                changed = self.right();
-                changed = changed.down();
-            },
-            Pos(-2, _) => changed = self.right(),
-            Pos(-1, 2) => {
-                changed = self.down();
-                changed = changed.right();
-            },
-            Pos(1, 2) => {
-                changed = self.down();
-                changed = changed.left();
-            },
-            Pos(_, 2) => changed = self.down(),
-            Pos(-1, -2) => {
-                changed = self.up();
-                changed = changed.right();
-            },
-            Pos(1, -2) => {
-                changed = self.up();
-                changed = changed.left();
-            },
-            Pos(_, -2) => changed = self.up(),
-            Pos(_, _) => changed = self,
-        };
-        
-        println!("H{:?} T{:?} -> {:?} | {:?}: {:?}", other, self, direction, new, changed);
-
-        return changed;
-    }
-}
 
 fn main() {
     let input = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();
@@ -88,50 +14,114 @@ fn main() {
 }
 
 fn part_one(input: &String) -> usize {
-    let mut visited = DefaultHashMap::new(-1i8);
-    
-    // starting position
-    let mut head = Pos(0,0);
-    let mut tail = Pos(0,0);
-    visited[tail] = 1;
+    let mut rope = Rope::new(2);
+    let mut visited = HashSet::new();
+    visited.insert(rope.end());
     
     // handle motions
     for motion in input.lines() {
         let (direction, moves) = motion.trim().split_once(" ").unwrap();
-        let steps = moves.parse::<i32>().unwrap();
-
-        // handle each single step in a motion
+        let direction = Direction::from(direction);
+        let steps: i32 = moves.parse().unwrap();
+        
         for _ in 0..steps {
-            match direction {
-                "U" => {
-                    head = head.up();
-                    tail = tail.follow(head, direction);
-                },
-                "D" => {
-                    head = head.down();
-                    tail = tail.follow(head, direction);
-                },
-                "L" => {
-                    head = head.left();
-                    tail = tail.follow(head, direction);
-                },
-                "R" => {
-                    head = head.right();
-                    tail = tail.follow(head, direction);
-                },
-                _ => panic!("invalid direction"),
-            }
-            
-            // record the places the tail visited
-            visited[tail] = 1;
+            rope.motion(direction);            
+            visited.insert(rope.end());
         }
     }
 
     return visited.len();
 }
 
-fn part_two(_input: &String) -> i32 {
-    return 0;
+fn part_two(input: &String) -> usize {
+    let mut rope = Rope::new(10);
+    let mut visited = HashSet::new();
+    visited.insert(rope.end());
+    
+    // handle motions
+    for motion in input.lines() {
+        let (direction, moves) = motion.trim().split_once(" ").unwrap();
+        let direction = Direction::from(direction);
+        let steps: i32 = moves.parse().unwrap();
+        
+        for _ in 0..steps {
+            rope.motion(direction);            
+            visited.insert(rope.end());
+        }
+    }
+
+    return visited.len();
+}
+
+#[derive(Debug, Copy, Clone)]
+enum Direction {
+    Up,
+    Down,
+    Right,
+    Left,
+}
+
+impl From<&str> for Direction {
+    fn from(s: &str) -> Self {
+        match s {
+            "U" => Up,
+            "D" => Down,
+            "R" => Right,
+            "L" => Left,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct Knot {
+    x: i64,
+    y: i64,
+}
+
+impl Knot {
+    fn new(x: i64, y: i64) -> Self {
+        Knot { x, y }
+    }
+}
+
+#[derive(Debug)]
+struct Rope {
+    len: usize,
+    knots: Vec<Knot>,
+}
+
+impl Rope {
+    fn new(len: usize) -> Self {
+        Rope {
+            len,
+            knots: vec![Knot::new(0, 0); len],
+        }
+    }
+    
+    fn motion(&mut self, direction: Direction) {
+        match direction {
+            Left => self.knots[0].x -= 1,
+            Down => self.knots[0].y -= 1,
+            Right => self.knots[0].x += 1,
+            Up => self.knots[0].y += 1,
+        }
+        
+        for i in 1..self.len {
+            let prev = self.knots[i - 1];
+            let next = self.knots[i];
+
+            let (dx, dy) = (prev.x - next.x, prev.y - next.y);
+            if dx.abs() > 1 || dy.abs() > 1 {
+                self.knots[i].x += dx.signum();
+                self.knots[i].y += dy.signum();
+            }
+        }
+    }
+
+    fn end(&self) -> Knot {
+        *self.knots.last().unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -144,10 +134,15 @@ mod tests {
         assert_eq!(13, part_one(&input));
     }
 
-    #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_two() {
         let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
-        assert_eq!(0, part_two(&input));
+        assert_eq!(1, part_two(&input));
+    }
+
+    #[test]
+    fn it_returns_the_answer_for_part_two_example_2() {
+        let input = std::fs::read_to_string("./fixtures/input_test2.txt").unwrap();
+        assert_eq!(36, part_two(&input));
     }
 }
