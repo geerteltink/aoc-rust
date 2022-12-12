@@ -1,11 +1,12 @@
 [package]
-name = "aoc_2022_day_12"
+name = "grid"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-default = { path = "../../libs/default" }
-grid = { path = "../../libs/grid" }
+defaultmap = "0.5.0"
+derive_more = "0.99.17"
+itertools = "0.10.5"
 pathfinding = "4.0.0"

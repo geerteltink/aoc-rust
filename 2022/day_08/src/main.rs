@@ -1,57 +1,10 @@
-use defaultmap::DefaultHashMap;
-use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
-pub use itertools::Itertools;
-use std::hash::Hash;
-use std::iter::from_fn;
+use default::*;
+use grid::*;
 
 static DAY: &'static str = "08";
 
-#[derive(
-    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
-)]
-struct Pos(isize, isize);
-
-impl Pos {
-    pub fn x(self) -> isize {
-        self.0
-    }
-
-    pub fn y(self) -> isize {
-        self.1
-    }
-
-    pub fn walk(self, unit: Self) -> impl Iterator<Item = Self> {
-        let mut pos = self;
-
-        return from_fn(move || {
-            pos += unit;
-            Some(pos)
-        });
-    }
-}
-
-pub trait ExtraItertools: Iterator + Sized {
-    fn test(
-        self,
-        mut pass: impl FnMut(&Self::Item) -> bool,
-        mut fail: impl FnMut(&Self::Item) -> bool,
-    ) -> bool {
-        for item in self {
-            if pass(&item) {
-                return true;
-            }
-            if fail(&item) {
-                return false;
-            }
-        }
-        unreachable!("the iterator does not pass or fail");
-    }
-}
-
-impl<T: Iterator + Sized> ExtraItertools for T {}
-
 fn main() {
-    let input = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();
+    let input = load_input(format!("./2022/day_{DAY}/fixtures/input.txt"));
 
     let result1 = part_one(&input);
     println!("Answer day {DAY} part one: {result1}");
@@ -61,18 +14,12 @@ fn main() {
 }
 
 fn part_one(input: &String) -> i32 {
-    let mut grid = DefaultHashMap::new(-1i8);
-
-    for (y, line) in input.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            grid[Pos(x as _, y as _)] = c.to_string().parse::<i8>().unwrap();
-        }
-    }
+    let grid = grid_from_input(&input, |c| c as i8, -1i8);
 
     let mut total_visible = 0;
     for (&pos, &height) in grid.iter() {
         let mut visible_from_outside = false;
-        for direction in [Pos(0, 1), Pos(1, 0), Pos(-1, 0), Pos(0, -1)] {
+        for direction in Pos::NEIGHBORS {
             let visible = pos
                 .walk(direction)
                 .test(|p| grid[p] == -1, |p| grid[p] >= height);
@@ -94,17 +41,12 @@ fn part_one(input: &String) -> i32 {
 }
 
 fn part_two(input: &String) -> usize {
-    let mut grid = DefaultHashMap::new(-1i8);
-
-    for (y, line) in input.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            grid[Pos(x as _, y as _)] = c.to_string().parse::<i8>().unwrap();
-        }
-    }
+    let grid = grid_from_input(&input, |c| c as i8, -1i8);
+    
     let mut max = 0;
     for (&pos, &height) in grid.iter() {
         let mut scenic_score = 1;
-        for direction in [Pos(0, 1), Pos(1, 0), Pos(-1, 0), Pos(0, -1)] {
+        for direction in Pos::NEIGHBORS {
             let visible = pos
                 .walk(direction)
                 .test(|p| grid[p] == -1, |p| grid[p] >= height);

@@ -19,14 +19,6 @@ impl Op {
             _ => panic!("Unknown operation"),
         }
     }
-    
-    fn apply(&self, v: i64) -> i64 {
-        match self {
-            Op::Sqr => v * v,
-            Op::Mul(v2) => v * v2,
-            Op::Add(v2) => v + v2,
-        }
-    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -72,7 +64,7 @@ fn part_one(input: &String) -> i64 {
     let mut inspections = vec![0i64; monkeys.len()];
     
     // play 20 rounds
-    for round in 0..20 {
+    for _round in 0..20 {
         // every monkey inspects all its items
         for i in 0..monkeys.len() {
             for item in take(&mut monkeys[i].items) {

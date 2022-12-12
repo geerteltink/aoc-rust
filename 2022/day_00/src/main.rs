@@ -1,3 +1,8 @@
+#![allow(unused_imports)]
+
+use default::*;
+use grid::*;
+
 static DAY: &'static str = "00";
 
 fn main() {

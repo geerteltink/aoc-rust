@@ -1,25 +1,12 @@
-use defaultmap::DefaultHashMap;
-use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
-pub use itertools::Itertools;
-use std::hash::Hash;
+use default::*;
+use grid::*;
 use pathfinding::prelude::bfs;
 
 // https://docs.rs/pathfinding/0.1.12/pathfinding/fn.bfs.html
 
 static DAY: &'static str = "12";
 
-#[derive(
-    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
-)]
-struct Pos(isize, isize);
-
-impl Pos {
-    fn neighbors (self) -> [Self; 4] {
-        [Self(0, 1), Self(1, 0), Self(-1, 0), Self(0, -1)].map(|pos| self + pos)
-    }
-}
-
-fn find_path(grid: &DefaultHashMap<Pos, u8>, start: Pos, end: u8) -> Option<usize> {
+fn find_path(grid: &Grid<Pos, u8>, start: Pos, end: u8) -> Option<usize> {
     let path = bfs(
         &start,
         |pos| {
@@ -49,7 +36,7 @@ fn get_elevation(c: u8) -> i32 {
 }
 
 fn main() {
-    let input = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();
+    let input = load_input(format!("./2022/day_{DAY}/fixtures/input.txt"));
 
     let result1 = part_one(&input);
     println!("Answer day {DAY} part one: {result1}");
@@ -59,33 +46,19 @@ fn main() {
 }
 
 fn part_one(input: &String) -> usize {
-    let mut grid = DefaultHashMap::new(b' ');
-    
-    for (y, line) in input.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            grid[Pos(x as _, y as _)] = c as u8;
-        }
-    }
+    let grid = grid_from_input(&input, |c| c as u8, b' ');
     
     // get start location
     let start = grid.iter().find(|loc| *loc.1 == b'S').unwrap();
     let end = b'E';
     // calculate minimal needed steps to reach end location
-    let path = find_path(&grid, *start.0, end);
-    let steps = path.unwrap();
+    let steps = find_path(&grid, *start.0, end).unwrap();
     
     return steps;
 }
 
-
 fn part_two(input: &String) -> usize {
-    let mut grid = DefaultHashMap::new(b' ');
-    
-    for (y, line) in input.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            grid[Pos(x as _, y as _)] = c as u8;
-        }
-    }    
+    let grid = grid_from_input(&input, |c| c as u8, b' '); 
     
     // iterate over grid
     // filter start locations and lowest locations
@@ -107,13 +80,13 @@ mod tests {
 
     #[test]
     fn it_returns_the_answer_for_part_one() {
-        let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
+        let input = load_input("./fixtures/input_test.txt");
         assert_eq!(31, part_one(&input));
     }
 
     #[test]
     fn it_returns_the_answer_for_part_two() {
-        let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
+        let input = load_input("./fixtures/input_test.txt");
         assert_eq!(29, part_two(&input));
     }
 }
