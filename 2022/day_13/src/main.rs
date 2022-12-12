@@ -6,7 +6,7 @@ use grid::*;
 static DAY: &'static str = "13";
 
 fn main() {
-    let input = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();
+    let input = load_input(format!("./2022/day_{DAY}/fixtures/input.txt"));
 
     let result1 = part_one(&input);
     println!("Answer day {DAY} part one: {result1}");
@@ -30,14 +30,14 @@ mod tests {
     #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_one() {
-        let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
+        let input = load_input("./fixtures/input_test.txt");
         assert_eq!(0, part_one(&input));
     }
 
     #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_two() {
-        let input = std::fs::read_to_string("./fixtures/input_test.txt").unwrap();
+        let input = load_input("./fixtures/input_test.txt");
         assert_eq!(0, part_two(&input));
     }
 }
