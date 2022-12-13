@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 default = { path = "../../libs/default" }
 grid = { path = "../../libs/grid" }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }

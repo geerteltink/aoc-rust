@@ -1,5 +1,6 @@
 use std::path::Path;
 pub use itertools::Itertools;
+pub use debug_print::{debug_print, debug_println, debug_eprint, debug_eprintln};
 
 pub fn load_input<P: AsRef<Path>>(path: P) -> String {
     std::fs::read_to_string(path).unwrap()
