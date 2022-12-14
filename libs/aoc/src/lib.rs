@@ -1,16 +1,62 @@
+pub use debug_print::{debug_print, debug_println, debug_eprint, debug_eprintln};
+pub use itertools::Itertools;
+
 use defaultmap::DefaultHashMap;
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
+use std::any::Any;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::from_fn;
+use std::path::Path;
+use std::cmp::Ordering;
+
+pub fn load_input<P: AsRef<Path>>(path: P) -> String {
+    std::fs::read_to_string(path).unwrap()
+}
+
+pub trait ExtraItertools: Iterator + Sized {
+    fn collect_string(self) -> String
+    where
+        String: FromIterator<Self::Item>,
+    {
+        self.collect()
+    }
+    
+    fn test(
+        self,
+        mut pass: impl FnMut(&Self::Item) -> bool,
+        mut fail: impl FnMut(&Self::Item) -> bool,
+    ) -> bool {
+        for item in self {
+            if pass(&item) {
+                return true;
+            }
+            if fail(&item) {
+                return false;
+            }
+        }
+        unreachable!("the iterator does not pass or fail");
+    }
+}
+
+impl<T: Iterator + Sized> ExtraItertools for T {}
 
 #[derive(
-    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
+    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd,
 )]
-pub struct Pos(isize, isize);
+pub struct Pos(pub isize, pub isize);
 
 impl Pos {
     pub const NEIGHBORS: [Self; 4] = [Self(0, 1), Self(1, 0), Self(-1, 0), Self(0, -1)];
 
+    pub fn x(self) -> isize {
+        return self.0;
+    }
+    
+    pub fn y(self) -> isize {
+        return self.1;
+    }
+    
     pub fn neighbors(self) -> [Self; 4] {
         Self::NEIGHBORS.map(|pos| self + pos)
     }
@@ -22,6 +68,12 @@ impl Pos {
             pos += unit;
             Some(pos)
         });
+    }
+}
+
+impl Ord for Pos {
+    fn cmp(&self, other: &Self) -> Ordering {
+       (self.1, self.0).cmp(&(other.1, other.0))
     }
 }
 
@@ -44,7 +96,7 @@ impl<K: Eq + Hash, V: Clone> DefaultGridHashMap for DefaultHashMap<K, V> {
     fn print(&self) {
         println!("Printing: {}", 1);
     }
-
+    
     /*
     fn from_input<F>(input: &str, f: F, default: V) -> DefaultHashMap<K, V>
     where
@@ -81,6 +133,33 @@ where
     }
 
     return grid;
+}
+
+pub fn grid_print<T: Clone + Debug + Any>(grid: &Grid<Pos, T>) {
+    let min_x = grid.keys().map(|x| x.0).min().unwrap();
+    let max_x = grid.keys().map(|x| x.0).max().unwrap();
+    let min_y = grid.keys().map(|x| x.1).min().unwrap();
+    let max_y = grid.keys().map(|x| x.1).max().unwrap();
+
+    println!("printing grid (len={})", grid.len());
+
+    for y in min_y..=max_y {
+        for x in min_x..=max_x {
+            let c = Pos(x, y);
+            let data = format!("{:?}", grid[c]);
+            if data.starts_with('\'') && data.ends_with('\'') {
+                print!("{}", data.chars().rev().nth(1).unwrap());
+            } else if data.starts_with('\"') && data.ends_with('\"') {
+                let mut data = data.chars().skip(1).collect_vec();
+                data.pop();
+                print!("{}", data.into_iter().collect_string());
+            } else {
+                print!("{}", data.chars().next().unwrap());
+            }
+        }
+        println!();
+    }
+    println!();
 }
 
 #[cfg(test)]

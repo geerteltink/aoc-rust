@@ -1,5 +1,4 @@
-use default::*;
-use grid::*;
+use aoc::*;
 
 static DAY: &'static str = "08";
 

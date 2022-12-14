@@ -1,4 +1,4 @@
-use default::*;
+use aoc::*;
 use serde_json::Value;
 use std::cmp::Ordering;
 

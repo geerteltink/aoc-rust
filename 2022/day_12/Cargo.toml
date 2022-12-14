@@ -6,6 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-default = { path = "../../libs/default" }
-grid = { path = "../../libs/grid" }
+aoc = { path = "../../libs/aoc" }
 pathfinding = "4.0.0"

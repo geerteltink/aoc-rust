@@ -1,7 +1,6 @@
 #![allow(unused_imports)]
 
-use default::*;
-use grid::*;
+use aoc::*;
 
 static DAY: &'static str = "00";
 
@@ -15,11 +14,11 @@ fn main() {
     println!("Answer day {DAY} part one: {result2}");
 }
 
-fn part_one(_input: &String) -> i32 {
+fn part_one(_input: &String) -> isize {
     return 0;
 }
 
-fn part_two(_input: &String) -> i32 {
+fn part_two(_input: &String) -> isize {
     return 0;
 }
 

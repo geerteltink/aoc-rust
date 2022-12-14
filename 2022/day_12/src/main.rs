@@ -1,5 +1,4 @@
-use default::*;
-use grid::*;
+use aoc::*;
 use pathfinding::prelude::bfs;
 
 // https://docs.rs/pathfinding/0.1.12/pathfinding/fn.bfs.html
