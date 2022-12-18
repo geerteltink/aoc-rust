@@ -1,5 +1,6 @@
 pub use debug_print::{debug_print, debug_println, debug_eprint, debug_eprintln};
 pub use itertools::Itertools;
+pub use std::collections::HashSet;
 
 use defaultmap::DefaultHashMap;
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
@@ -10,11 +11,24 @@ use std::iter::from_fn;
 use std::path::Path;
 use std::cmp::Ordering;
 
+#[cfg(debug_assertions)]
+pub const DEBUG: bool = true;
+
+#[cfg(not(debug_assertions))]
+pub const DEBUG: bool = false;
+
 pub fn load_input<P: AsRef<Path>>(path: P) -> String {
     std::fs::read_to_string(path).unwrap()
 }
 
 pub trait ExtraItertools: Iterator + Sized {
+    fn collect_set(self) -> HashSet<Self::Item>
+    where
+        Self::Item: Eq + Hash,
+    {
+        self.collect()
+    }
+    
     fn collect_string(self) -> String
     where
         String: FromIterator<Self::Item>,
@@ -40,6 +54,22 @@ pub trait ExtraItertools: Iterator + Sized {
 }
 
 impl<T: Iterator + Sized> ExtraItertools for T {}
+
+#[derive(
+    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd,
+)]
+pub struct Loc {
+    pub x: i64,
+    pub y: i64,
+}
+
+impl Loc {
+    pub fn manhattan_distance(self) -> i64 {
+        self.x.abs() + self.y.abs()
+    }
+}
+
+pub type Map<Loc, T> = DefaultHashMap<Loc, T>;
 
 #[derive(
     Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd,
@@ -160,6 +190,20 @@ pub fn grid_print<T: Clone + Debug + Any>(grid: &Grid<Pos, T>) {
         println!();
     }
     println!();
+}
+
+pub fn extract_numbers<const N: usize>(s: &str) -> [i64; N] {
+    s.split(|c: char| !c.is_numeric() && c != '-')
+        .filter_map(|x| {
+            if x.is_empty() {
+                None
+            } else {
+                Some(x.trim().to_string().parse().unwrap())
+            }
+        })
+        .collect_vec()
+        .try_into()
+        .unwrap()
 }
 
 #[cfg(test)]
