@@ -2,6 +2,9 @@ pub use debug_print::{debug_eprint, debug_eprintln, debug_print, debug_println};
 pub use itertools::Itertools;
 pub use std::collections::HashSet;
 
+pub mod arena;
+pub mod arena3d;
+
 use defaultmap::DefaultHashMap;
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
 use std::any::Any;
