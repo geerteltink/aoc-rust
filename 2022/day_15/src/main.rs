@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use aoc::*;
+use aoc::arena::*;
 
 static DAY: &'static str = "15";
 

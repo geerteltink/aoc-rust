@@ -12,10 +12,6 @@ pub struct Loc3D {
 }
 
 impl Loc3D {
-    pub fn new(x: i64, y: i64, z: i64) -> Self {
-        Self { x, y, z }
-    }
-
     pub const NEIGHBORS: [Self; 6] = [
         Self { x: 1, y: 0, z: 0 },
         Self { x: 0, y: 1, z: 0 },
@@ -25,6 +21,10 @@ impl Loc3D {
         Self { x: 0, y: 0, z: -1 },
     ];
 
+    pub fn new(x: i64, y: i64, z: i64) -> Self {
+        Self { x, y, z }
+    }
+    
     pub fn neighbors(self) -> [Self; 6] {
         Self::NEIGHBORS.map(|loc| self + loc)
     }

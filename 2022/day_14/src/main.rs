@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use aoc::*;
+use aoc::arena::*;
 use std::cmp::Ordering;
 
 static DAY: &'static str = "14";
@@ -23,7 +24,7 @@ fn main() {
 }
 
 fn part_one(input: &String) -> usize {
-    let mut grid: Grid<Pos, Sprite> = Grid::new(Sprite::Air);
+    let mut grid: DefaultHashMap<Loc, Sprite> = DefaultHashMap::new(Sprite::Air);
 
     // Load map
     for path in input.lines() {
@@ -32,9 +33,9 @@ fn part_one(input: &String) -> usize {
             .map(|c| c.trim())
             .map(|c| c.split(','))
             .map(|mut c| {
-                Pos(
-                    c.next().unwrap().parse::<isize>().unwrap(),
-                    c.next().unwrap().parse::<isize>().unwrap(),
+                Loc::new(
+                    c.next().unwrap().parse::<i64>().unwrap(),
+                    c.next().unwrap().parse::<i64>().unwrap(),
                 )
             });
 
@@ -43,16 +44,16 @@ fn part_one(input: &String) -> usize {
         for next in points {
             from = to;
             to = next;
-            for x in from.0.min(to.0)..=from.0.max(to.0) {
-                for y in from.1.min(to.1)..=from.1.max(to.1) {
-                    grid.insert(Pos(x, y), Sprite::Rock);
+            for x in from.x.min(to.x)..=from.x.max(to.x) {
+                for y in from.y.min(to.y)..=from.y.max(to.y) {
+                    grid.insert(Loc::new(x, y), Sprite::Rock);
                 }
             }
         }
     }
 
     let mut count = 0;
-    let max: isize = grid.iter().map(|c| c.0 .1).max().unwrap();
+    let max: i64 = grid.iter().map(|c| c.0.y).max().unwrap();
 
     // If it cannot move anymore, next sand unit
     while let Some(pos) = drop_sand(&grid, max, false) {
@@ -60,13 +61,11 @@ fn part_one(input: &String) -> usize {
         count += 1;
     }
 
-    grid_print(&grid);
-
     return count;
 }
 
 fn part_two(input: &String) -> usize {
-    let mut grid: Grid<Pos, Sprite> = Grid::new(Sprite::Air);
+    let mut grid: DefaultHashMap<Loc, Sprite> = DefaultHashMap::new(Sprite::Air);
 
     // Load map
     for path in input.lines() {
@@ -75,9 +74,9 @@ fn part_two(input: &String) -> usize {
             .map(|c| c.trim())
             .map(|c| c.split(','))
             .map(|mut c| {
-                Pos(
-                    c.next().unwrap().parse::<isize>().unwrap(),
-                    c.next().unwrap().parse::<isize>().unwrap(),
+                Loc::new(
+                    c.next().unwrap().parse::<i64>().unwrap(),
+                    c.next().unwrap().parse::<i64>().unwrap(),
                 )
             });
 
@@ -86,16 +85,16 @@ fn part_two(input: &String) -> usize {
         for next in points {
             from = to;
             to = next;
-            for x in from.0.min(to.0)..=from.0.max(to.0) {
-                for y in from.1.min(to.1)..=from.1.max(to.1) {
-                    grid.insert(Pos(x, y), Sprite::Rock);
+            for x in from.x.min(to.x)..=from.x.max(to.x) {
+                for y in from.y.min(to.y)..=from.y.max(to.y) {
+                    grid.insert(Loc::new(x, y), Sprite::Rock);
                 }
             }
         }
     }
 
     let mut count = 0;
-    let max: isize = grid.iter().map(|c| c.0 .1).max().unwrap();
+    let max: i64 = grid.iter().map(|c| c.0.y).max().unwrap();
 
     // If it cannot move anymore, next sand unit
     while let Some(pos) = drop_sand(&grid, max, true) {
@@ -103,38 +102,36 @@ fn part_two(input: &String) -> usize {
         count += 1;
     }
 
-    grid_print(&grid);
-
     return count;
 }
 
-fn drop_sand(grid: &Grid<Pos, Sprite>, max_y: isize, part2: bool) -> Option<Pos> {
-    let mut sand = Pos(500, 0);
+fn drop_sand(grid: &DefaultHashMap<Loc, Sprite>, max_y: i64, part2: bool) -> Option<Loc> {
+    let mut sand = Loc::new(500, 0);
     let floor = max_y + 2;
 
-    if grid.get(&Pos(500, 0)) != &Sprite::Air {
+    if grid.get(&Loc::new(500, 0)) != &Sprite::Air {
         return None;
     }
 
     // Move sand unit, first down, then left, then right
-    while grid.get(Pos(sand.0, sand.1 + 1)) == &Sprite::Air
-        || grid.get(&Pos(sand.0 - 1, sand.1 + 1)) == &Sprite::Air
-        || grid.get(&Pos(sand.0 + 1, sand.1 + 1)) == &Sprite::Air
+    while grid.get(Loc::new(sand.x, sand.y + 1)) == &Sprite::Air
+        || grid.get(&Loc::new(sand.x - 1, sand.y + 1)) == &Sprite::Air
+        || grid.get(&Loc::new(sand.x + 1, sand.y + 1)) == &Sprite::Air
     {
-        if sand.1 == floor - 1 {
+        if sand.y == (floor - 1) as i64 {
             if part2 {
                 break;
             } else {
                 return None
             }
-        } else if grid.get(&Pos(sand.0, sand.1 + 1)) == &Sprite::Air {
-            sand.1 += 1;
-        } else if grid.get(&Pos(sand.0 - 1, sand.1 + 1)) == &Sprite::Air {
-            sand.0 -= 1;
-            sand.1 += 1;
+        } else if grid.get(&Loc::new(sand.x, sand.y + 1)) == &Sprite::Air {
+            sand.y += 1;
+        } else if grid.get(&Loc::new(sand.x - 1, sand.y + 1)) == &Sprite::Air {
+            sand.x -= 1;
+            sand.y += 1;
         } else {
-            sand.0 += 1;
-            sand.1 += 1;
+            sand.x += 1;
+            sand.y += 1;
         }
     }
     Some(sand)

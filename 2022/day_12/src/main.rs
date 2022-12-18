@@ -1,11 +1,12 @@
 use aoc::*;
+use aoc::arena::*;
 use pathfinding::prelude::bfs;
 
 // https://docs.rs/pathfinding/0.1.12/pathfinding/fn.bfs.html
 
 static DAY: &'static str = "12";
 
-fn find_path(grid: &Grid<Pos, u8>, start: Pos, end: u8) -> Option<usize> {
+fn find_path(grid: &DefaultHashMap<Loc, u8>, start: Loc, end: u8) -> Option<usize> {
     let path = bfs(
         &start,
         |pos| {
@@ -45,7 +46,13 @@ fn main() {
 }
 
 fn part_one(input: &String) -> usize {
-    let grid = grid_from_input(&input, |c| c as u8, b' ');
+    let mut grid: DefaultHashMap<Loc, u8> = DefaultHashMap::new(b' ');
+    
+    for (y, line) in input.lines().enumerate() {
+        for (x, c) in line.trim().chars().enumerate() {
+            grid[Loc::new(x as i64,y as i64)] = c as u8;
+        }
+    }
     
     // get start location
     let start = grid.iter().find(|loc| *loc.1 == b'S').unwrap();
@@ -57,7 +64,13 @@ fn part_one(input: &String) -> usize {
 }
 
 fn part_two(input: &String) -> usize {
-    let grid = grid_from_input(&input, |c| c as u8, b' '); 
+    let mut grid: DefaultHashMap<Loc, u8> = DefaultHashMap::new(b' ');
+    
+    for (y, line) in input.lines().enumerate() {
+        for (x, c) in line.trim().chars().enumerate() {
+            grid[Loc::new(x as i64,y as i64)] = c as u8;
+        }
+    }
     
     // iterate over grid
     // filter start locations and lowest locations

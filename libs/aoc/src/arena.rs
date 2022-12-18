@@ -1,6 +1,8 @@
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
+// use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::iter::from_fn;
 
 #[derive(
     Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
@@ -10,7 +12,7 @@ pub struct Loc {
     pub y: i64,
 }
 
-impl Loc {
+impl Loc {  
     pub const NEIGHBORS: [Self; 4] = [
         Self { x: 0, y: 1 },
         Self { x: 1, y: 0 },
@@ -18,6 +20,10 @@ impl Loc {
         Self { x: 0, y: -1 },
     ];
 
+    pub fn new(x: i64, y: i64) -> Self {
+        Self { x, y }
+    }
+    
     pub fn neighbors(self) -> [Self; 4] {
         Self::NEIGHBORS.map(|loc| self + loc)
     }
@@ -38,6 +44,15 @@ impl Loc {
         self + Self { x: 1 * n, y: 0 }
     }
 
+    pub fn walk(self, unit: Self) -> impl Iterator<Item = Self> {
+        let mut pos = self;
+
+        return from_fn(move || {
+            pos += unit;
+            Some(pos)
+        });
+    }
+    
     pub fn manhattan_distance(self) -> i64 {
         self.x.abs() + self.y.abs()
     }
@@ -70,6 +85,13 @@ impl Loc {
     }
 }
 
+/*
+impl Ord for Loc {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (self.y, self.x).cmp(&(other.y, other.x))
+    }
+}
+*/
 
 pub struct Arena {
     pub map: HashSet<Loc>,
@@ -88,5 +110,28 @@ impl Arena {
     
     pub fn insert(&mut self, loc: Loc) {
         self.map.insert(loc);
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_returns_all_neighbors() {
+        let loc = Loc::new(0, 0);
+
+        assert_eq!(Loc::NEIGHBORS, loc.neighbors());
+    }
+
+    #[test]
+    fn it_creates_a_new_arena() {
+        let mut arena = Arena::new();
+        let loc = Loc::new(0, 0);
+        
+        arena.insert(loc);
+
+        assert_eq!(true, arena.map.contains(&loc));
     }
 }

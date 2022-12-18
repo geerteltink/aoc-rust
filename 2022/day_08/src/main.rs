@@ -1,4 +1,5 @@
 use aoc::*;
+use aoc::arena::*;
 
 static DAY: &'static str = "08";
 
@@ -13,12 +14,18 @@ fn main() {
 }
 
 fn part_one(input: &String) -> i32 {
-    let grid = grid_from_input(&input, |c| c as i8, -1i8);
+    let mut grid: DefaultHashMap<Loc, i8> = DefaultHashMap::new(-1i8);
+    
+    for (y, line) in input.lines().enumerate() {
+        for (x, c) in line.trim().chars().enumerate() {
+            grid[Loc::new(x as i64,y as i64)] = c as i8;
+        }
+    }
 
     let mut total_visible = 0;
     for (&pos, &height) in grid.iter() {
         let mut visible_from_outside = false;
-        for direction in Pos::NEIGHBORS {
+        for direction in Loc::NEIGHBORS {
             let visible = pos
                 .walk(direction)
                 .test(|p| grid[p] == -1, |p| grid[p] >= height);
@@ -40,12 +47,18 @@ fn part_one(input: &String) -> i32 {
 }
 
 fn part_two(input: &String) -> usize {
-    let grid = grid_from_input(&input, |c| c as i8, -1i8);
+    let mut grid: DefaultHashMap<Loc, i8> = DefaultHashMap::new(-1i8);
+    
+    for (y, line) in input.lines().enumerate() {
+        for (x, c) in line.trim().chars().enumerate() {
+            grid[Loc::new(x as i64,y as i64)] = c as i8;
+        }
+    }
     
     let mut max = 0;
     for (&pos, &height) in grid.iter() {
         let mut scenic_score = 1;
-        for direction in Pos::NEIGHBORS {
+        for direction in Loc::NEIGHBORS {
             let visible = pos
                 .walk(direction)
                 .test(|p| grid[p] == -1, |p| grid[p] >= height);
