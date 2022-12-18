@@ -11,7 +11,7 @@ fn main() {
     println!("Answer day {DAY} part one: {result1}");
 
     let result2 = part_two(&input);
-    println!("Answer day {DAY} part one: {result2}");
+    println!("Answer day {DAY} part two: {result2}");
 }
 
 fn part_one(_input: &String) -> isize {

@@ -1,15 +1,15 @@
-pub use debug_print::{debug_print, debug_println, debug_eprint, debug_eprintln};
+pub use debug_print::{debug_eprint, debug_eprintln, debug_print, debug_println};
 pub use itertools::Itertools;
 pub use std::collections::HashSet;
 
 use defaultmap::DefaultHashMap;
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
 use std::any::Any;
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::from_fn;
 use std::path::Path;
-use std::cmp::Ordering;
 
 #[cfg(debug_assertions)]
 pub const DEBUG: bool = true;
@@ -28,14 +28,14 @@ pub trait ExtraItertools: Iterator + Sized {
     {
         self.collect()
     }
-    
+
     fn collect_string(self) -> String
     where
         String: FromIterator<Self::Item>,
     {
         self.collect()
     }
-    
+
     fn test(
         self,
         mut pass: impl FnMut(&Self::Item) -> bool,
@@ -56,7 +56,7 @@ pub trait ExtraItertools: Iterator + Sized {
 impl<T: Iterator + Sized> ExtraItertools for T {}
 
 #[derive(
-    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd,
+    Eq, PartialEq, Hash, Debug, Copy, Clone, AddAssign, SubAssign, Add, Sub, Sum, PartialOrd, Ord,
 )]
 pub struct Loc {
     pub x: i64,
@@ -64,8 +64,62 @@ pub struct Loc {
 }
 
 impl Loc {
+    pub const NEIGHBORS: [Self; 4] = [
+        Self { x: 0, y: 1 },
+        Self { x: 1, y: 0 },
+        Self { x: -1, y: 0 },
+        Self { x: 0, y: -1 },
+    ];
+
+    pub fn neighbors(self) -> [Self; 4] {
+        Self::NEIGHBORS.map(|loc| self + loc)
+    }
+
+    pub fn up(self, n: i64) -> Self {
+        self + Self { x: 0, y: -1 * n }
+    }
+
+    pub fn down(self, n: i64) -> Self {
+        self + Self { x: 0, y: 1 * n }
+    }
+
+    pub fn left(self, n: i64) -> Self {
+        self + Self { x: -1 * n, y: 0 }
+    }
+
+    pub fn right(self, n: i64) -> Self {
+        self + Self { x: 1 * n, y: 0 }
+    }
+
     pub fn manhattan_distance(self) -> i64 {
         self.x.abs() + self.y.abs()
+    }
+
+    pub fn manhattan_distance_corners(self) -> i64 {
+        self.y.abs().max(self.x.abs())
+    }
+
+    pub fn manhattan_circle(self, radius: i64) -> Vec<Loc> {
+        let mut circle = Vec::new();
+        for i in 0..radius {
+            circle.push(Loc {
+                x: self.x - radius + i,
+                y: self.y + i,
+            });
+            circle.push(Loc {
+                x: self.x + i,
+                y: self.y + radius - i,
+            });
+            circle.push(Loc {
+                x: self.x + radius - i,
+                y: self.y - i,
+            });
+            circle.push(Loc {
+                x: self.x - i,
+                y: self.y - (radius - i),
+            });
+        }
+        circle
     }
 }
 
@@ -82,11 +136,11 @@ impl Pos {
     pub fn x(self) -> isize {
         return self.0;
     }
-    
+
     pub fn y(self) -> isize {
         return self.1;
     }
-    
+
     pub fn neighbors(self) -> [Self; 4] {
         Self::NEIGHBORS.map(|pos| self + pos)
     }
@@ -103,7 +157,7 @@ impl Pos {
 
 impl Ord for Pos {
     fn cmp(&self, other: &Self) -> Ordering {
-       (self.1, self.0).cmp(&(other.1, other.0))
+        (self.1, self.0).cmp(&(other.1, other.0))
     }
 }
 
@@ -126,14 +180,14 @@ impl<K: Eq + Hash, V: Clone> DefaultGridHashMap for DefaultHashMap<K, V> {
     fn print(&self) {
         println!("Printing: {}", 1);
     }
-    
+
     /*
     fn from_input<F>(input: &str, f: F, default: V) -> DefaultHashMap<K, V>
     where
         K: Eq + Hash,
         F: FnMut(char) -> V,
         V: Clone,
-        Pos: Borrow<K> 
+        Pos: Borrow<K>
     {
         let mut grid = Self::new(default);
 
