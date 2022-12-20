@@ -50,7 +50,17 @@ impl State {
     }
 }
 
-fn simulate(blueprint: &Blueprint, time: u32) -> u32 {
+// https://en.wikipedia.org/wiki/Breadth-first_search
+// 
+// Declare a queue and insert the starting vertex.
+// Initialize a visited array and mark the starting vertex as visited.
+// Follow the below process till the queue becomes empty:
+//   - Remove the first vertex of the queue.
+//   - Mark that vertex as visited.
+//   - Insert all the unvisited neighbours of the vertex into the queue.
+// 
+fn bfs(blueprint: &Blueprint, time: u32) -> u32 {
+    // Declare a queue and insert the starting vertex.
     let mut queue = VecDeque::new();
     let mut seen = HashSet::new();
 
@@ -61,19 +71,25 @@ fn simulate(blueprint: &Blueprint, time: u32) -> u32 {
         blueprint.geode_robot_ore_cost
     ].iter().max().unwrap();
 
+    // Initialize a visited array and mark the starting vertex as visited.
     queue.push_back((0, State::new()));
 
     let mut answer = 0;
+    
+    // Follow the below process till the queue becomes empty:
+    // - Remove the first vertex of the queue.
     while let Some((len, state)) = queue.pop_front() {
         if len >= time {
             answer = std::cmp::max(answer, state.geodes);
             continue;
         }
 
+        // - Mark that vertex as visited.Mark that vertex as visited.
         if !seen.insert(state) {
             continue;
         }
 
+        // - Insert all the unvisited neighbours of the vertex into the queue.
         if state.ore >= blueprint.geode_robot_ore_cost && state.obsidian >= blueprint.geode_robot_obsidian_cost {
             let mut state = state.collect_resources();
             state.ore -= blueprint.geode_robot_ore_cost;
@@ -152,7 +168,7 @@ fn part_one(input: &String) -> u32 {
 
     return blueprints
         .par_iter()
-        .map(|blueprint| simulate(blueprint, 24) * blueprint.id)
+        .map(|blueprint| bfs(blueprint, 24) * blueprint.id)
         .sum();
 }
 
@@ -185,7 +201,7 @@ fn part_two(input: &String) -> u32 {
     return blueprints
         .par_iter()
         .take(3)
-        .map(|blueprint| simulate(blueprint, 32))
+        .map(|blueprint| bfs(blueprint, 32))
         .product();
 }
 
