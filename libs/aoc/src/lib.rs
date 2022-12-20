@@ -2,12 +2,13 @@ pub use debug_print::{debug_eprint, debug_eprintln, debug_print, debug_println};
 pub use defaultmap::DefaultHashMap;
 pub use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
 pub use itertools::Itertools;
+pub use rayon::prelude::*;
 pub use regex::Regex;
 pub use std::cmp;
 pub use std::cmp::Reverse;
 pub use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+pub use std::fmt::{Debug, Display};
 pub use std::time::Instant;
-pub use rayon::prelude::*;
 
 pub mod arena;
 pub mod arena3d;
@@ -72,3 +73,18 @@ pub trait ExtraItertools: Iterator + Sized {
 }
 
 impl<T: Iterator + Sized> ExtraItertools for T {}
+
+pub trait ToInt {
+    fn int(&self) -> i64;
+    fn uint(&self) -> usize;
+}
+
+impl<T: Display> ToInt for T {
+    fn int(&self) -> i64 {
+        self.to_string().parse().unwrap()
+    }
+
+    fn uint(&self) -> usize {
+        self.to_string().parse().unwrap()
+    }
+}
