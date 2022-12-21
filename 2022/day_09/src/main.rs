@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fmt::Debug, hash::Hash};
+use aoc::*;
 use Direction::*;
 
 static DAY: &'static str = "09";

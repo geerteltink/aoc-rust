@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 use aoc::*;
 
 static DAY: &'static str = "20";

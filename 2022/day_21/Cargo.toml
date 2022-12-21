@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 aoc = { path = "../../libs/aoc" }
+parse-display = "0.8.0"
+xxcalc = "0.2.1"

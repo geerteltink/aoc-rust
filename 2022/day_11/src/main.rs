@@ -1,6 +1,5 @@
+use aoc::*;
 use std::mem::take;
-use itertools::Itertools;
-use num::Integer;
 
 static DAY: &'static str = "11";
 

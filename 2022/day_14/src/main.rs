@@ -1,8 +1,5 @@
-#![allow(unused_imports)]
-
 use aoc::*;
 use aoc::arena::*;
-use std::cmp::Ordering;
 
 static DAY: &'static str = "14";
 

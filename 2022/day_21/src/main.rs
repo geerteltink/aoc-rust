@@ -1,32 +1,69 @@
-#![allow(unused_imports)]
-
 use aoc::*;
+use parse_display::{Display, FromStr};
+use xxcalc::calculator::Calculator;
+use xxcalc::linear_solver::LinearSolver;
 
 static DAY: &'static str = "21";
 
-#[derive(Debug, Clone)]
-struct Monkey {
-    a: Option<String>,
-    op: Option<String>,
-    b: Option<String>,
-    value: Option<i64>,
+// parse_display is a really nice way to import data
+#[derive(Display, FromStr, Debug)]
+enum Operation {
+    #[display("{0}")]
+    Number(usize),
+    #[display("{0} + {1}")]
+    Add(String, String),
+    #[display("{0} - {1}")]
+    Subtract(String, String),
+    #[display("{0} * {1}")]
+    Multiply(String, String),
+    #[display("{0} / {1}")]
+    Divide(String, String),
 }
 
-fn resolve_name(name: &str, monkeys: &HashMap<String, Monkey>) -> i64 {
-    let monkey = monkeys.get(name).unwrap();
-    
-    if monkey.value.is_some() {
-        return monkey.value.unwrap();
+#[derive(Display, FromStr, Debug)]
+#[display("{name}: {operation}")]
+struct Monkey {
+    name: String,
+    operation: Operation,
+}
+
+fn resolve_name(monkeys: &HashMap<String, Operation>, monkey: &str) -> usize {
+    match &monkeys[monkey] {
+        Operation::Number(n) => *n,
+        Operation::Add(a, b) => resolve_name(monkeys, a) + resolve_name(monkeys, b),
+        Operation::Subtract(a, b) => resolve_name(monkeys, a) - resolve_name(monkeys, b),
+        Operation::Multiply(a, b) => resolve_name(monkeys, a) * resolve_name(monkeys, b),
+        Operation::Divide(a, b) => resolve_name(monkeys, a) / resolve_name(monkeys, b),
     }
-    
-    let a = resolve_name(monkey.a.as_ref().unwrap(), &monkeys);
-    let b = resolve_name(monkey.b.as_ref().unwrap(), &monkeys);
-    match monkey.op.as_ref().unwrap().clone().as_str() {
-        "+" => return a + b,
-        "-" => return a - b,
-        "*" => return a * b,
-        "/" => return a / b,
-        _ => panic!("Unknown operator"),
+}
+
+fn build_expression(monkeys: &HashMap<String, Operation>, monkey_name: &str) -> String {
+    if monkey_name == "humn" {
+        return "x".to_string();
+    }
+    let monkey = &monkeys[monkey_name];
+    match monkey {
+        Operation::Number(n) => n.to_string(),
+        Operation::Add(a, b) => format!(
+            "({} + {})",
+            build_expression(monkeys, a),
+            build_expression(monkeys, b)
+        ),
+        Operation::Subtract(a, b) => format!(
+            "({} - {})",
+            build_expression(monkeys, a),
+            build_expression(monkeys, b)
+        ),
+        Operation::Multiply(a, b) => format!(
+            "({} * {})",
+            build_expression(monkeys, a),
+            build_expression(monkeys, b)
+        ),
+        Operation::Divide(a, b) => format!(
+            "({} / {})",
+            build_expression(monkeys, a),
+            build_expression(monkeys, b)
+        ),
     }
 }
 
@@ -45,65 +82,50 @@ fn main() {
     println!("Answer day {DAY} part two: {result2} in {:?}", end - start);
 }
 
-fn part_one(input: &String) -> i64 {
-    let mut monkeys: HashMap<String, Monkey> = HashMap::new();
-    
-    for line in input.lines() {
-        let (name, yell) = line.trim().split_once(":").unwrap();
-        if let Ok(x) = yell.trim().parse::<i64>() {
-            monkeys.insert(name.to_string(), Monkey {
-                a: None,
-                op: None,
-                b: None,
-                value: Some(x),
-            });
-            continue;
-        }
-        
-        let (a, op, b) = yell.trim().split_whitespace().collect_tuple().unwrap();
-        monkeys.insert(name.to_string(), Monkey {
-            a: Some(a.to_string()),
-            op: Some(op.to_string()),
-            b: Some(b.to_string()),
-            value: None,
-        });
-    }
+fn part_one(input: &String) -> usize {
+    let monkeys = input
+        .lines()
+        .map(str::parse)
+        .map(Result::unwrap)
+        .map(|m: Monkey| (m.name, m.operation))
+        .collect::<HashMap<_, _>>();
 
-    return resolve_name("root", &monkeys);
+    return resolve_name(&monkeys, "root");
 }
 
-fn part_two(input: &String) -> isize {
-    let mut monkeys: HashMap<String, Monkey> = HashMap::new();
-    
-    for line in input.lines() {
-        let (name, yell) = line.trim().split_once(":").unwrap();
-        if let Ok(x) = yell.trim().parse::<i64>() {
-            monkeys.insert(name.to_string(), Monkey {
-                a: None,
-                op: None,
-                b: None,
-                value: Some(x),
-            });
-            continue;
-        }
-        
-        let (a, op, b) = yell.trim().split_whitespace().collect_tuple().unwrap();
-        monkeys.insert(name.to_string(), Monkey {
-            a: Some(a.to_string()),
-            op: Some(op.to_string()),
-            b: Some(b.to_string()),
-            value: None,
-        });
-    }
-    
-    let root = monkeys.get("root").unwrap();
+// Borrowed solution part two from https://github.com/MrRobb/advent-of-code-2022/blob/main/src/day21.rs
+// Just because it is so much cooler than what I had
+//
+// @see https://docs.rs/xxcalc/latest/xxcalc/linear_solver/index.html
+//
+fn part_two(input: &String) -> usize {
+    let monkeys = input
+        .lines()
+        .map(str::parse)
+        .map(Result::unwrap)
+        .map(|m: Monkey| (m.name, m.operation))
+        .collect::<HashMap<_, _>>();
 
-    let left = resolve_name(root.a.as_ref().unwrap(), &monkeys);
-    let right = resolve_name(root.b.as_ref().unwrap(), &monkeys);
-    
-    dbg!(left, right);
-    
-    return 0;
+    let equation = match &monkeys["root"] {
+        Operation::Add(a, b)
+        | Operation::Subtract(a, b)
+        | Operation::Multiply(a, b)
+        | Operation::Divide(a, b) => {
+            format!(
+                "{} = {}",
+                build_expression(&monkeys, a),
+                resolve_name(&monkeys, b)
+            )
+        }
+        Operation::Number(_) => unreachable!(),
+    };
+
+    return LinearSolver
+        .process(&equation)
+        .unwrap()
+        .as_f64()
+        .unwrap()
+        .round() as usize;
 }
 
 #[cfg(test)]
@@ -121,17 +143,16 @@ mod tests {
         let input = load_input("./fixtures/input_test.txt");
         assert_eq!(301, part_two(&input));
     }
-    
+
     #[test]
     fn it_returns_the_answer_for_part_one() {
         let input = load_input("./fixtures/input.txt");
         assert_eq!(83056452926300, part_one(&input));
     }
-    
-    #[ignore]
+
     #[test]
     fn it_returns_the_answer_for_part_two() {
         let input = load_input("./fixtures/input.txt");
-        assert_eq!(0, part_two(&input));
+        assert_eq!(3469704905529, part_two(&input));
     }
 }

@@ -9,4 +9,3 @@ edition = "2021"
 aoc = { path = "../../libs/aoc" }
 defaultmap = "0.5.0"
 derive_more = "0.99.17"
-itertools = "0.10.5"

@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 use aoc::*;
 
 static DAY: &'static str = "17";
@@ -103,7 +101,6 @@ fn part_two(input: &String) -> usize {
     let mut current_rock = 0;
     let mut current_pos = (3isize, 2isize);
     let mut rocks_dropped = 0u64;
-    let mut map_hidden_height = 0u64;
 
     // TODO: FIX THIS
     while rocks_dropped < 1_000_000_000_000 {

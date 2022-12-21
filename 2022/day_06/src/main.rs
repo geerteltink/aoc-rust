@@ -1,6 +1,6 @@
 static DAY: &'static str = "06";
 
-use itertools::Itertools;
+use aoc::*;
 
 fn main() {
     let input = std::fs::read_to_string(format!("./2022/day_{DAY}/fixtures/input.txt")).unwrap();

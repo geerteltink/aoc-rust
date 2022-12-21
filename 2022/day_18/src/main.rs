@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 use aoc::*;
 use aoc::arena3d::*;
 
