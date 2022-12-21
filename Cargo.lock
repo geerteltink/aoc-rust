@@ -140,6 +140,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc_2022_day_17"
+version = "0.1.0"
+dependencies = [
+ "aoc",
+]
+
+[[package]]
 name = "aoc_2022_day_18"
 version = "0.1.0"
 dependencies = [
