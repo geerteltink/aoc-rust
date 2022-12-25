@@ -24,7 +24,7 @@ impl Loc3D {
     pub fn new(x: i64, y: i64, z: i64) -> Self {
         Self { x, y, z }
     }
-    
+
     pub fn neighbors(self) -> [Self; 6] {
         Self::NEIGHBORS.map(|loc| self + loc)
     }
@@ -72,10 +72,10 @@ impl Arena3D {
             max_z,
         }
     }
-    
+
     pub fn insert(&mut self, loc: Loc3D) {
         self.map.insert(loc);
-        
+
         self.min_x = self.map.iter().map(|x| x.x).min().unwrap() - 1;
         self.max_x = self.map.iter().map(|x| x.x).max().unwrap() + 1;
         self.min_y = self.map.iter().map(|x| x.y).min().unwrap() - 1;

@@ -1,3 +1,4 @@
+use defaultmap::DefaultHashMap;
 use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
 // use std::cmp::Ordering;
 use std::collections::HashSet;
@@ -12,7 +13,7 @@ pub struct Loc {
     pub y: i64,
 }
 
-impl Loc {  
+impl Loc {
     pub const NEIGHBORS: [Self; 4] = [
         Self { x: 0, y: 1 },
         Self { x: 1, y: 0 },
@@ -23,7 +24,7 @@ impl Loc {
     pub fn new(x: i64, y: i64) -> Self {
         Self { x, y }
     }
-    
+
     pub fn neighbors(self) -> [Self; 4] {
         Self::NEIGHBORS.map(|loc| self + loc)
     }
@@ -52,7 +53,7 @@ impl Loc {
             Some(pos)
         });
     }
-    
+
     pub fn manhattan_distance(self) -> i64 {
         self.x.abs() + self.y.abs()
     }
@@ -105,14 +106,45 @@ impl Arena {
     }
 
     pub fn from_map(map: HashSet<Loc>) -> Self {
-        Self { map,}
+        Self { map }
     }
-    
+
     pub fn insert(&mut self, loc: Loc) {
         self.map.insert(loc);
     }
 }
 
+//pub type ArenA<T> = DefaultHashMap<Loc, T>;
+
+pub fn default_hash_map_arena_from_input<T: Clone>(
+    s: &str,
+    mut f: impl FnMut(char) -> T,
+    default: T,
+) -> DefaultHashMap<Loc, T> {
+    let mut arena = DefaultHashMap::new(default);
+
+    for (y, line) in s.lines().enumerate() {
+        for (x, c) in line.chars().enumerate() {
+            arena[Loc::new(x as _, y as _)] = f(c);
+        }
+    }
+
+    return arena;
+}
+
+pub fn hash_set_arena_from_input(s: &str, mut f: impl FnMut(char) -> bool) -> HashSet<Loc> {
+    let mut arena = HashSet::new();
+
+    for (y, line) in s.lines().enumerate() {
+        for (x, c) in line.chars().enumerate() {
+            if f(c) {
+                arena.insert(Loc::new(x as _, y as _));
+            }
+        }
+    }
+
+    return arena;
+}
 
 #[cfg(test)]
 mod tests {
@@ -129,7 +161,7 @@ mod tests {
     fn it_creates_a_new_arena() {
         let mut arena = Arena::new();
         let loc = Loc::new(0, 0);
-        
+
         arena.insert(loc);
 
         assert_eq!(true, arena.map.contains(&loc));
