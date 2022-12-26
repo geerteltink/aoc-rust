@@ -19,7 +19,7 @@ fn main() {
 }
 
 fn part_one(input: &String) -> isize {
-    let grid = create_grid_from_input(&input, |c| c, '#');
+    let grid = Grid::from_input(&input, |c| c, '#');
 
     let start = Coordinate::new(1 as isize, 0 as isize);
     let end = grid

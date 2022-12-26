@@ -50,15 +50,12 @@ impl Player {
         for _ in 0..x {
             let old_loc = self.loc;
             let mut new_loc = self.loc;
-            let mut movement = Loc::new(0, 0);
             match self.dir {
-                Direction::Up => movement = Loc::new(0, -1),
-                Direction::Down => movement = Loc::new(0, 1),
-                Direction::Right => movement = Loc::new(1, 0),
-                Direction::Left => movement = Loc::new(-1, 0),
+                Direction::Up =>new_loc += Loc::new(0, -1),
+                Direction::Down => new_loc += Loc::new(0, 1),
+                Direction::Right => new_loc += Loc::new(1, 0),
+                Direction::Left => new_loc += Loc::new(-1, 0),
             }
-
-            new_loc += movement;
 
             let board_loc = board.get(new_loc);
             if board_loc == &WALL {

@@ -5,7 +5,7 @@ pub use hashbrown::HashMap;
 pub use itertools::Itertools;
 pub use num::*;
 pub use pathfinding::directed::count_paths::count_paths;
-pub use pathfinding::prelude::*;
+pub use pathfinding::prelude::bfs;
 pub use rayon::prelude::*;
 pub use regex::Regex;
 pub use std::cmp;

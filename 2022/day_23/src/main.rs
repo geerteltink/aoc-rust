@@ -27,7 +27,7 @@ fn main() {
 }
 
 fn part_one(input: &String) -> isize {
-    let mut grid = create_hash_set_from_input(&input, |c| c == '#');
+    let mut grid = Grid::from_filtered_input(&input, |c| c == '#', '#');
 
     let nw = Coordinate { x: -1, y: -1 };
     let n = Coordinate { x: 0, y: -1 };
@@ -45,23 +45,21 @@ fn part_one(input: &String) -> isize {
         Direction::East,
     ];
 
-    print_hash_set_grid(&grid);
-
     for _ in 0..10 {
         let mut proposes: HashMap<Coordinate, Vec<Coordinate>> = HashMap::new();
-        let mut next_grid: HashSet<Coordinate> = HashSet::new();
+        let mut next_grid: Grid<Coordinate, char> = Grid::new('#');
 
         // first half of a round: each Elf considers the eight positions adjacent to themself
-        'outer: for elf in grid.iter() {
-            if elf.extended_neighbors().iter().all(|n| !grid.contains(n)) {
-                next_grid.insert(*elf);
+        'outer: for (elf, _) in grid.iter() {
+            if elf.extended_neighbors().iter().all(|n| !grid.has(n)) {
+                next_grid[*elf] = '#';
             } else {
                 for direction in directions.iter() {
                     match direction {
                         Direction::North => {
-                            if !grid.contains(&(*elf + nw))
-                                && !grid.contains(&(*elf + n))
-                                && !grid.contains(&(*elf + ne))
+                            if !grid.has(&(*elf + nw))
+                                && !grid.has(&(*elf + n))
+                                && !grid.has(&(*elf + ne))
                             {
                                 proposes.entry(*elf + n).or_default();
                                 proposes.get_mut(&(*elf + n)).unwrap().push(*elf);
@@ -69,9 +67,9 @@ fn part_one(input: &String) -> isize {
                             }
                         }
                         Direction::South => {
-                            if !grid.contains(&(*elf + sw))
-                                && !grid.contains(&(*elf + s))
-                                && !grid.contains(&(*elf + se))
+                            if !grid.has(&(*elf + sw))
+                                && !grid.has(&(*elf + s))
+                                && !grid.has(&(*elf + se))
                             {
                                 proposes.entry(*elf + s).or_default();
                                 proposes.get_mut(&(*elf + s)).unwrap().push(*elf);
@@ -79,9 +77,9 @@ fn part_one(input: &String) -> isize {
                             }
                         }
                         Direction::West => {
-                            if !grid.contains(&(*elf + sw))
-                                && !grid.contains(&(*elf + w))
-                                && !grid.contains(&(*elf + nw))
+                            if !grid.has(&(*elf + sw))
+                                && !grid.has(&(*elf + w))
+                                && !grid.has(&(*elf + nw))
                             {
                                 proposes.entry(*elf + w).or_default();
                                 proposes.get_mut(&(*elf + w)).unwrap().push(*elf);
@@ -89,9 +87,9 @@ fn part_one(input: &String) -> isize {
                             }
                         }
                         Direction::East => {
-                            if !grid.contains(&(*elf + ne))
-                                && !grid.contains(&(*elf + e))
-                                && !grid.contains(&(*elf + se))
+                            if !grid.has(&(*elf + ne))
+                                && !grid.has(&(*elf + e))
+                                && !grid.has(&(*elf + se))
                             {
                                 proposes.entry(*elf + e).or_default();
                                 proposes.get_mut(&(*elf + e)).unwrap().push(*elf);
@@ -101,7 +99,7 @@ fn part_one(input: &String) -> isize {
                     }
                 }
             }
-            next_grid.insert(*elf);
+            next_grid[*elf] = '#';
         }
 
         // second half of the round: simultaneously, each Elf moves to their proposed destination tile
@@ -109,10 +107,10 @@ fn part_one(input: &String) -> isize {
         // If two or more Elves propose moving to the same position, none of those Elves move.
         for (new, old) in proposes.iter() {
             if old.len() == 1 {
-                next_grid.insert(*new);
+                next_grid[*new] = '#';
             } else {
                 for elf in old {
-                    next_grid.insert(*elf);
+                    next_grid[*elf] = '#';
                 }
             }
         }
@@ -124,10 +122,10 @@ fn part_one(input: &String) -> isize {
     
     //print_hash_set_grid(&grid);
 
-    let min_x = grid.iter().map(|c| c.x).min().unwrap();
-    let max_x = grid.iter().map(|c| c.x).max().unwrap();
-    let min_y = grid.iter().map(|c| c.y).min().unwrap();
-    let max_y = grid.iter().map(|c| c.y).max().unwrap();
+    let min_x = grid.iter().map(|(c, _)| c.x).min().unwrap();
+    let max_x = grid.iter().map(|(c, _)| c.x).max().unwrap();
+    let min_y = grid.iter().map(|(c, _)| c.y).min().unwrap();
+    let max_y = grid.iter().map(|(c, _)| c.y).max().unwrap();
 
     return (max_x - min_x + 1) * (max_y - min_y + 1) - grid.len() as isize;
 }
