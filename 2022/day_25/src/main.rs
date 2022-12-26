@@ -18,7 +18,7 @@ fn main() {
 }
 
 fn part_one(input: &String) -> String {
-    let mut sum = input
+    let sum = input
         .lines()
         .map(|line| snafu_to_decimal(line))
         .sum::<i64>();
@@ -84,18 +84,18 @@ mod tests {
     #[test]
     fn it_returns_the_decimal_for_a_snafu_number() {
         assert_eq!(1747, snafu_to_decimal("1=-0-2"));
-        assert_eq!(906, snafu_to_decimal("12111"));
-        assert_eq!(198, snafu_to_decimal("2=0="));
-        assert_eq!(11, snafu_to_decimal("21"));
-        assert_eq!(201, snafu_to_decimal("2=01"));
-        assert_eq!(31, snafu_to_decimal("111"));
+        assert_eq!(906,  snafu_to_decimal("12111"));
+        assert_eq!(198,  snafu_to_decimal("2=0="));
+        assert_eq!(11,   snafu_to_decimal("21"));
+        assert_eq!(201,  snafu_to_decimal("2=01"));
+        assert_eq!(31,   snafu_to_decimal("111"));
         assert_eq!(1257, snafu_to_decimal("20012"));
-        assert_eq!(32, snafu_to_decimal("112"));
-        assert_eq!(353, snafu_to_decimal("1=-1="));
-        assert_eq!(107, snafu_to_decimal("1-12"));
-        assert_eq!(7, snafu_to_decimal("12"));
-        assert_eq!(3, snafu_to_decimal("1="));
-        assert_eq!(37, snafu_to_decimal("122"));
+        assert_eq!(32,   snafu_to_decimal("112"));
+        assert_eq!(353,  snafu_to_decimal("1=-1="));
+        assert_eq!(107,  snafu_to_decimal("1-12"));
+        assert_eq!(7,    snafu_to_decimal("12"));
+        assert_eq!(3,    snafu_to_decimal("1="));
+        assert_eq!(37,   snafu_to_decimal("122"));
     }
 
     #[test]

@@ -16,6 +16,7 @@ pub use std::time::Instant;
 
 pub mod arena;
 pub mod arena3d;
+pub mod grid;
 
 use std::hash::Hash;
 use std::path::Path;

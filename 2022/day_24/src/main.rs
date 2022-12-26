@@ -1,4 +1,4 @@
-use aoc::arena::*;
+use aoc::grid::*;
 use aoc::*;
 
 static DAY: &'static str = "24";
@@ -19,8 +19,18 @@ fn main() {
 }
 
 fn part_one(input: &String) -> isize {
-    let arena = default_hash_map_arena_from_input(&input, |c| c, '#');
+    let grid = create_grid_from_input(&input, |c| c, '#');
 
+    let start = Coordinate::new(1 as isize, 0 as isize);
+    let end = grid
+        .iter()
+        .filter(|x| *x.1 == '.')
+        .map(|x| *x.0)
+        .max_by_key(|coordinate| coordinate.y)
+        .unwrap();
+    
+    dbg!(&grid, &start, &end);
+        
     return 0;
 }
 
