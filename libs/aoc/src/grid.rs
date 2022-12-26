@@ -4,7 +4,7 @@ use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign, Mul, Neg};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Coordinate {
@@ -49,6 +49,26 @@ impl SubAssign for Coordinate {
     fn sub_assign(&mut self, other: Self) {
         self.x -= other.x;
         self.y -= other.y;
+    }
+}
+
+impl Mul<isize> for Coordinate {
+    type Output = Self;
+    fn mul(self, rhs: isize) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl Neg for Coordinate {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
 
@@ -161,6 +181,22 @@ impl Coordinate {
         self.x.max(other.x) - self.x.min(other.x) + self.y.max(other.y) - self.y.min(other.y)
     }
 
+    pub fn up(self, n: isize) -> Self {
+        self + Self::new(0, -1) * n
+    }
+
+    pub fn down(self, n: isize) -> Self {
+        self + Self::new(0, 1) * n
+    }
+
+    pub fn left(self, n: isize) -> Self {
+        self + Self::new(-1, 0) * n
+    }
+
+    pub fn right(self, n: isize) -> Self {
+        self + Self::new(1, 0) * n
+    }
+    
     /*
     pub fn manhattan_circle(self, radius: T) -> Vec<Coordinate> {
         let mut circle = Vec::new();
