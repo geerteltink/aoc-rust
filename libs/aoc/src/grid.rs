@@ -1,10 +1,11 @@
 use hashbrown::hash_map::*;
 use hashbrown::HashMap;
+use itertools::Itertools;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign, Mul, Neg};
+use std::ops::{Add, AddAssign, Index, IndexMut, Mul, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Coordinate {
@@ -196,7 +197,7 @@ impl Coordinate {
     pub fn right(self, n: isize) -> Self {
         self + Self::new(1, 0) * n
     }
-    
+
     /*
     pub fn manhattan_circle(self, radius: T) -> Vec<Coordinate> {
         let mut circle = Vec::new();
@@ -223,18 +224,27 @@ impl Coordinate {
     */
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub struct Grid<K: Eq + Hash, V: Clone> {
-    map: HashMap<K, V>,
+pub struct GridDimensions {
+    pub min_x: isize,
+    pub max_x: isize,
+    pub total_x: isize,
+    pub min_y: isize,
+    pub max_y: isize,
+    pub total_y: isize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Grid<V: Clone> {
+    map: HashMap<Coordinate, V>,
     default: V,
 }
 
-impl<K: Eq + Hash, V: Default + Clone> Default for Grid<K, V> {
+impl<V: Default + Clone> Default for Grid<V> {
     /// The `default()` constructor creates an empty Grid with the default of `V`
     /// as the default for missing keys.
     /// This is desired default for most use cases, if your case requires a
     /// different default you should use the `new()` constructor.
-    fn default() -> Grid<K, V> {
+    fn default() -> Grid<V> {
         Grid {
             map: HashMap::default(),
             default: V::default(),
@@ -242,13 +252,13 @@ impl<K: Eq + Hash, V: Default + Clone> Default for Grid<K, V> {
     }
 }
 
-impl<K: Eq + Hash, V: Default + Clone> From<HashMap<K, V>> for Grid<K, V> {
+impl<V: Default + Clone> From<HashMap<Coordinate, V>> for Grid<V> {
     /// If you already have a `HashMap` that you would like to convert to a
     /// `Grid` you can use the `into()` method on the `HashMap` or the
     /// `from()` constructor of `Grid`.
     /// The default value for missing keys will be `V::default()`,
     /// if this is not desired `Grid::new_with_map()` should be used.
-    fn from(map: HashMap<K, V>) -> Grid<K, V> {
+    fn from(map: HashMap<Coordinate, V>) -> Grid<V> {
         Grid {
             map,
             default: V::default(),
@@ -256,53 +266,46 @@ impl<K: Eq + Hash, V: Default + Clone> From<HashMap<K, V>> for Grid<K, V> {
     }
 }
 
-impl<K: Eq + Hash, V: Clone> Into<HashMap<K, V>> for Grid<K, V> {
+impl<V: Clone> Into<HashMap<Coordinate, V>> for Grid<V> {
     /// The into method can be used to convert a `Grid` back into a
     /// `HashMap`.
-    fn into(self) -> HashMap<K, V> {
+    fn into(self) -> HashMap<Coordinate, V> {
         self.map
     }
 }
 
 /// Implements the `Index` trait so you can do `map[key]`.
 /// Nonmutable indexing can be done both by passing a reference or an owned value as the key.
-impl<'a, K: Eq + Hash, KB: Borrow<K>, V: Clone> Index<KB> for Grid<K, V> {
+impl<'a, V: Clone> Index<Coordinate> for Grid<V> {
     type Output = V;
 
-    fn index(&self, index: KB) -> &V {
+    fn index(&self, index: Coordinate) -> &V {
         self.get(index)
     }
 }
 
 /// Implements the `IndexMut` trait so you can do `map[key] = val`.
 /// Mutably indexing can only be done when passing an owned value as the key.
-impl<K: Eq + Hash, V: Clone> IndexMut<K> for Grid<K, V> {
+impl<V: Clone> IndexMut<Coordinate> for Grid<V> {
     #[inline]
-    fn index_mut(&mut self, index: K) -> &mut V {
+    fn index_mut(&mut self, index: Coordinate) -> &mut V {
         self.get_mut(index)
     }
 }
 
-impl<K: Eq + Hash, V: Clone> Grid<K, V> {
+impl<V: Clone> Grid<V> {
     /// Creates an empty `Grid` with `default` as the default for missing keys.
     /// When the provided `default` is equivalent to `V::default()` it is preferred to use
     /// `Grid::default()` instead.
-    pub fn new(default: V) -> Grid<K, V> {
+    pub fn new(default: V) -> Grid<V> {
         Grid {
             map: HashMap::new(),
             default,
         }
     }
 
-    pub fn from_input(
-        input: &str,
-        mut f: impl FnMut(char) -> V,
-        default: V,
-    ) -> Grid<Coordinate, V>
-    where
-        Coordinate: Borrow<K>,
-    {
-        let mut grid: Grid<Coordinate, V> = Grid::new(default);
+    pub fn from_input(input: &str, mut f: impl FnMut(char) -> V, default: V) -> Grid<V> {
+        let mut grid: Grid<V> = Grid::new(default);
 
         for (y, line) in input.lines().enumerate() {
             for (x, c) in line.chars().enumerate() {
@@ -312,17 +315,16 @@ impl<K: Eq + Hash, V: Clone> Grid<K, V> {
 
         grid
     }
-    
+
     pub fn from_filtered_input(
         input: &str,
         mut f: impl FnMut(char) -> bool,
         default: char,
-    ) -> Grid<Coordinate, char>
+    ) -> Grid<char>
     where
-        Coordinate: Borrow<K>,
         char: Borrow<V>,
     {
-        let mut grid: Grid<Coordinate, char> = Grid::new(default);
+        let mut grid: Grid<char> = Grid::new(default);
 
         for (y, line) in input.lines().enumerate() {
             for (x, c) in line.chars().enumerate() {
@@ -341,7 +343,7 @@ impl<K: Eq + Hash, V: Clone> Grid<K, V> {
     /// This method accepts both references and owned values as the key.
     pub fn get<Q, QB: Borrow<Q>>(&self, key: QB) -> &V
     where
-        K: Borrow<Q>,
+        Coordinate: Borrow<Q>,
         Q: ?Sized + Hash + Eq,
     {
         self.map.get(key.borrow()).unwrap_or(&self.default)
@@ -352,7 +354,7 @@ impl<K: Eq + Hash, V: Clone> Grid<K, V> {
     /// key before returning the reference.
     /// Usually the `map[key] = new_val` is preferred over using `get_mut` directly.
     /// This method only accepts owned values as the key.
-    pub fn get_mut(&mut self, key: K) -> &mut V {
+    pub fn get_mut(&mut self, key: Coordinate) -> &mut V {
         let default = &self.default;
         self.map.entry(key).or_insert_with(|| default.clone())
     }
@@ -360,98 +362,79 @@ impl<K: Eq + Hash, V: Clone> Grid<K, V> {
     #[inline]
     pub fn has<Q>(&self, k: &Q) -> bool
     where
-        K: Borrow<Q>,
+        Coordinate: Borrow<Q>,
         Q: ?Sized + Hash + Eq,
     {
         self.map.contains_key(k)
     }
     #[inline]
-    pub fn keys(&self) -> Keys<K, V> {
+    pub fn keys(&self) -> Keys<Coordinate, V> {
         self.map.keys()
     }
     #[inline]
-    pub fn values(&self) -> Values<K, V> {
+    pub fn values(&self) -> Values<Coordinate, V> {
         self.map.values()
     }
     #[inline]
-    pub fn values_mut(&mut self) -> ValuesMut<K, V> {
+    pub fn values_mut(&mut self) -> ValuesMut<Coordinate, V> {
         self.map.values_mut()
     }
     #[inline]
-    pub fn iter(&self) -> Iter<K, V> {
+    pub fn iter(&self) -> Iter<Coordinate, V> {
         self.map.iter()
     }
     #[inline]
-    pub fn iter_mut(&mut self) -> IterMut<K, V> {
+    pub fn iter_mut(&mut self) -> IterMut<Coordinate, V> {
         self.map.iter_mut()
     }
     #[inline]
     pub fn len(&self) -> usize {
         self.map.len()
     }
-}
 
-/*
-//pub type Grid<T> = Grid<Coordinate, T>;
+    pub fn dimensions(&self) -> GridDimensions {
+        let min_x = self.iter().map(|(c, _)| c.x).min().unwrap();
+        let max_x = self.iter().map(|(c, _)| c.x).max().unwrap();
+        let min_y = self.iter().map(|(c, _)| c.y).min().unwrap();
+        let max_y = self.iter().map(|(c, _)| c.y).max().unwrap();
 
-/// Usage:
-///   let arena = create_grid_from_input(&input, |c| c, '#');
-pub fn create_grid_from_input<T: Clone>(
-    s: &str,
-    mut f: impl FnMut(char) -> T,
-    default: T,
-) -> Grid<T> {
-    let mut grid = Grid::new(default);
-
-    for (y, line) in s.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            grid[Coordinate::new(x as isize, y as isize)] = f(c);
+        GridDimensions {
+            min_x,
+            max_x,
+            total_x: max_x - min_x,
+            min_y,
+            max_y,
+            total_y: max_y - min_y,
         }
     }
 
-    return grid;
-}
+    pub fn print(&self)
+    where
+        V: Copy + Debug,
+    {
+        let dimensions = self.dimensions();
 
-pub type GridSet = HashSet<Coordinate>;
+        println!("printing grid (len={})", &self.len());
 
-/// Usage:
-///   let mut arena = create_hash_set_from_input(&input, |c| c == '#');
-pub fn create_hash_set_from_input(s: &str, mut f: impl FnMut(char) -> bool) -> GridSet {
-    let mut grid = GridSet::new();
-
-    for (y, line) in s.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            if f(c) {
-                grid.insert(Coordinate::new(x as isize, y as isize));
+        for y in dimensions.min_y..=dimensions.max_y {
+            for x in dimensions.min_x..=dimensions.max_x {
+                let c = Coordinate::new(x, y);
+                let data = format!("{:?}", self[c]);
+                if data.starts_with('\'') && data.ends_with('\'') {
+                    print!("{}", data.chars().rev().nth(1).unwrap());
+                } else if data.starts_with('\"') && data.ends_with('\"') {
+                    let mut data = data.chars().skip(1).collect_vec();
+                    data.pop();
+                    print!("{}", data.into_iter().collect::<String>());
+                } else {
+                    print!("{}", data.chars().next().unwrap());
+                }
             }
-        }
-    }
-
-    return grid;
-}
-
-pub fn print_hash_set_grid(grid: &HashSet<Coordinate>) {
-    let min_x = grid.iter().map(|c| c.x).min().unwrap();
-    let max_x = grid.iter().map(|c| c.x).max().unwrap();
-    let min_y = grid.iter().map(|c| c.y).min().unwrap();
-    let max_y = grid.iter().map(|c| c.y).max().unwrap();
-
-    println!("printing grid (len={})", grid.len());
-
-    for y in min_y..=max_y {
-        for x in min_x..=max_x {
-            let c = Coordinate::new(x, y);
-            if grid.contains(&c) {
-                print!("#");
-            } else {
-                print!(".");
-            }
+            println!();
         }
         println!();
     }
-    println!();
 }
-*/
 
 #[cfg(test)]
 mod tests {
@@ -481,8 +464,8 @@ mod tests {
 
     #[test]
     fn it_can_create_a_new_grid() {
-        let expected: Grid<Coordinate, i8> = Grid::new(1i8);
-        let actual: Grid<Coordinate, i8> = Grid {
+        let expected: Grid<i8> = Grid::new(1i8);
+        let actual: Grid<i8> = Grid {
             map: HashMap::new(),
             default: 1i8,
         };
@@ -498,7 +481,7 @@ mod tests {
             Coordinate::new(1, 0),
             Coordinate::new(-1, 0),
         ];
-        let mut grid: Grid<Coordinate, i8> = Grid::new(-1i8);
+        let mut grid: Grid<i8> = Grid::new(-1i8);
         for coordinate in coordinates.iter() {
             grid[*coordinate] = 2;
         }
@@ -520,7 +503,7 @@ mod tests {
             (Coordinate::new(-1, 0), 5),
         ];
 
-        let mut grid: Grid<Coordinate, Vec<i32>> = Grid::default();
+        let mut grid: Grid<Vec<i32>> = Grid::default();
 
         for &(coordinate, value) in coordinate_values.iter() {
             grid[coordinate].push(value);
@@ -543,5 +526,21 @@ mod tests {
         assert_eq!(grid[Coordinate::new(4, 0)], '.');
         assert_eq!(grid[Coordinate::new(5, 0)], '#');
         assert_eq!(grid[Coordinate::new(6, 0)], ' ');
+    }
+
+    #[test]
+    fn it_returns_correct_dimensions() {
+        let mut grid = Grid::new('.');
+        grid[Coordinate::new(-2, -2)] = '#';
+        grid[Coordinate::new(2, 2)] = '#';
+
+        let dimensions = grid.dimensions();
+
+        assert_eq!(-2, dimensions.min_x);
+        assert_eq!(2, dimensions.max_x);
+        assert_eq!(4, dimensions.total_x);
+        assert_eq!(-2, dimensions.min_y);
+        assert_eq!(2, dimensions.max_y);
+        assert_eq!(4, dimensions.total_y);
     }
 }

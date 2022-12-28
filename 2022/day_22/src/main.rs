@@ -48,10 +48,9 @@ impl Player {
 
     fn walk(&mut self, x: usize, board: &DefaultHashMap<Loc, i8>) {
         for _ in 0..x {
-            let old_loc = self.loc;
             let mut new_loc = self.loc;
             match self.dir {
-                Direction::Up =>new_loc += Loc::new(0, -1),
+                Direction::Up => new_loc += Loc::new(0, -1),
                 Direction::Down => new_loc += Loc::new(0, 1),
                 Direction::Right => new_loc += Loc::new(1, 0),
                 Direction::Left => new_loc += Loc::new(-1, 0),
@@ -59,7 +58,7 @@ impl Player {
 
             let board_loc = board.get(new_loc);
             if board_loc == &WALL {
-                println!("Hit wall {:?}", &new_loc);
+                //println!("Hit wall {:?}", &new_loc);
                 // do nothing if a wall is hit
                 return;
             }
@@ -107,20 +106,111 @@ impl Player {
 
                 let board_loc = board.get(new_loc);
                 if board_loc == &WALL {
-                    println!("Hit wall on the other side{:?}", &new_loc);
+                    //println!("Hit wall on the other side{:?}", &new_loc);
                     // do nothing if a wall is hit
                     return;
                 }
 
-                println!("Out of bounds {:?}", &new_loc);
+                //println!("Out of bounds {:?}", &new_loc);
             }
 
-            println!("Moved {:?} from {:?} -> {:?}", &self.dir, old_loc, &new_loc);
+            //println!("Moved {:?} from {:?} -> {:?}", &self.dir, old_loc, &new_loc);
+
+            self.loc = new_loc;
+        }
+    }
+    
+    fn walk_in_cube(&mut self, x: usize, board: &DefaultHashMap<Loc, i8>) {
+        for _ in 0..x {
+            let mut new_loc = self.loc;
+            match self.dir {
+                Direction::Up => new_loc += Loc::new(0, -1),
+                Direction::Down => new_loc += Loc::new(0, 1),
+                Direction::Right => new_loc += Loc::new(1, 0),
+                Direction::Left => new_loc += Loc::new(-1, 0),
+            }
+
+            let board_loc = board.get(new_loc);
+            if board_loc == &WALL {
+                //println!("Hit wall {:?}", &new_loc);
+                // do nothing if a wall is hit
+                return;
+            }
+            
+            if board_loc == &OUT_OF_BOUNDS {
+                // continue on the next side inside the cube
+                match self.dir {
+                    Direction::Up => {
+                        new_loc = board
+                            .iter()
+                            .filter(|(loc, value)| loc.x == new_loc.x && value != &&OUT_OF_BOUNDS)
+                            .max_by(|a, b| a.0.y.cmp(&b.0.y))
+                            .unwrap()
+                            .0
+                            .to_owned()
+                    }
+                    Direction::Down => {
+                        new_loc = board
+                            .iter()
+                            .filter(|(loc, value)| loc.x == new_loc.x && value != &&OUT_OF_BOUNDS)
+                            .min_by(|a, b| a.0.y.cmp(&b.0.y))
+                            .unwrap()
+                            .0
+                            .to_owned()
+                    }
+                    Direction::Right => {
+                        new_loc = board
+                            .iter()
+                            .filter(|(loc, value)| loc.y == new_loc.y && value != &&OUT_OF_BOUNDS)
+                            .min_by(|a, b| a.0.x.cmp(&b.0.x))
+                            .unwrap()
+                            .0
+                            .to_owned()
+                    }
+                    Direction::Left => {
+                        new_loc = board
+                            .iter()
+                            .filter(|(loc, value)| loc.y == new_loc.y && value != &&OUT_OF_BOUNDS)
+                            .max_by(|a, b| a.0.x.cmp(&b.0.x))
+                            .unwrap()
+                            .0
+                            .to_owned()
+                    }
+                }
+
+                let board_loc = board.get(new_loc);
+                if board_loc == &WALL {
+                    //println!("Hit wall on the other side{:?}", &new_loc);
+                    // do nothing if a wall is hit
+                    return;
+                }
+
+                //println!("Out of bounds {:?}", &new_loc);
+            }
+
+            //println!("Moved {:?} from {:?} -> {:?}", &self.dir, old_loc, &new_loc);
 
             self.loc = new_loc;
         }
     }
 }
+
+/*
+            111111
+  0123456789012345
+ 0        ...#
+ 1        .#..
+ 2        #...
+ 3        ....
+ 4...#.......#
+ 5........#...
+ 6..#....#....
+ 7..........#.
+ 8        ...#....
+ 9        .....#..
+10        .#......
+11        ......#.
+*/
 
 fn main() {
     let input = load_input(format!("./2022/day_{DAY}/fixtures/input.txt"));
@@ -203,8 +293,70 @@ fn part_one(input: &String) -> i64 {
     return answer;
 }
 
-fn part_two(_input: &String) -> isize {
-    return 0;
+fn part_two(input: &String) -> i64 {
+    let mut board: DefaultHashMap<Loc, i8> = DefaultHashMap::new(OUT_OF_BOUNDS);
+
+    // add all non empty spaces to the board
+    let (board_rows, directions) = input.split_once("\n\n").unwrap();
+    for (y, board_row) in board_rows.lines().enumerate() {
+        for (x, c) in board_row.chars().enumerate() {
+            let c = c as i8;
+            if c != OUT_OF_BOUNDS {
+                board[Loc::new((x + 1) as i64, (y + 1) as i64)] = c;
+            }
+        }
+    }
+
+    // convert directions to instructions
+    let mut instructions = Vec::new();
+    let mut num = 0;
+    for c in directions.trim().chars() {
+        if c.is_ascii_digit() {
+            num = num * 10 + c.to_digit(10).unwrap();
+        } else {
+            if num != 0 {
+                instructions.push(Instruction::Move(num as usize));
+                num = 0;
+            }
+            match c {
+                'R' => instructions.push(Instruction::TurnRight),
+                'L' => instructions.push(Instruction::TurnLeft),
+                _ => unreachable!(),
+            }
+        }
+    }
+    // add a possible left over movement to the instructions
+    if num != 0 {
+        instructions.push(Instruction::Move(num as usize));
+    }
+
+    // find player start position
+    let player_start = board
+        .iter()
+        .filter(|(loc, value)| loc.y == 1 && value != &&OUT_OF_BOUNDS)
+        .min_by(|a, b| a.0.x.cmp(&b.0.x))
+        .unwrap()
+        .0
+        .to_owned();
+
+    let mut player = Player {
+        loc: player_start,
+        dir: Direction::Right,
+    };
+
+    // I like to move it, move it
+    for instruction in instructions {
+        match instruction {
+            Instruction::TurnLeft => player.turn_left(),
+            Instruction::TurnRight => player.turn_right(),
+            Instruction::Move(x) => player.walk(x, &board),
+        }
+    }
+
+    // The final password is the sum of 1000 times the row, 4 times the column, and the facing.
+    let answer = player.loc.y * 1000 + player.loc.x * 4;
+
+    return answer;
 }
 
 #[cfg(test)]

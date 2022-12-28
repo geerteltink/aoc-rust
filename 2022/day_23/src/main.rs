@@ -47,7 +47,7 @@ fn part_one(input: &String) -> isize {
 
     for _ in 0..10 {
         let mut proposes: HashMap<Coordinate, Vec<Coordinate>> = HashMap::new();
-        let mut next_grid: Grid<Coordinate, char> = Grid::new('#');
+        let mut next_grid: Grid<char> = Grid::new('#');
 
         // first half of a round: each Elf considers the eight positions adjacent to themself
         'outer: for (elf, _) in grid.iter() {
