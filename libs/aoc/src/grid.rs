@@ -5,6 +5,7 @@ use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
+use std::ops::Div;
 use std::ops::{Add, AddAssign, Index, IndexMut, Mul, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -59,6 +60,16 @@ impl Mul<isize> for Coordinate {
         Self {
             x: self.x * rhs,
             y: self.y * rhs,
+        }
+    }
+}
+
+impl Div<isize> for Coordinate {
+    type Output = Self;
+    fn div(self, rhs: isize) -> Self::Output {
+        Self {
+            x: self.x / rhs,
+            y: self.y / rhs,
         }
     }
 }
