@@ -1,16 +1,16 @@
 pub use debug_print::{debug_eprint, debug_eprintln, debug_print, debug_println};
 pub use defaultmap::DefaultHashMap;
 pub use derive_more::{Add, AddAssign, Sub, SubAssign, Sum};
-pub use hashbrown::HashMap;
+pub use hashbrown::{HashMap, HashSet};
 pub use itertools::Itertools;
 pub use num::*;
 pub use pathfinding::directed::count_paths::count_paths;
-pub use pathfinding::prelude::bfs;
+pub use pathfinding::prelude::{bfs,dijkstra};
 pub use rayon::prelude::*;
 pub use regex::Regex;
 pub use std::cmp;
 pub use std::cmp::Reverse;
-pub use std::collections::{BinaryHeap, HashSet, VecDeque};
+pub use std::collections::{BinaryHeap, VecDeque};
 pub use std::fmt::{Debug, Display};
 pub use std::time::Instant;
 

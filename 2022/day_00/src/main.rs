@@ -37,12 +37,6 @@ mod tests {
         assert_eq!(0, part_one(&input));
     }
 
-    #[test]
-    fn it_returns_the_test_answer_for_part_two() {
-        let input = load_input("./fixtures/input_test.txt");
-        assert_eq!(0, part_two(&input));
-    }
-    
     #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_one() {
@@ -50,6 +44,13 @@ mod tests {
         assert_eq!(0, part_one(&input));
     }
     
+    #[ignore]
+    #[test]
+    fn it_returns_the_test_answer_for_part_two() {
+        let input = load_input("./fixtures/input_test.txt");
+        assert_eq!(0, part_two(&input));
+    }
+       
     #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_two() {
