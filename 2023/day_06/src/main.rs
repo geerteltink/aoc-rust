@@ -76,10 +76,9 @@ mod tests {
         assert_eq!(71503, part_two(&input));
     }
 
-    #[ignore]
     #[test]
     fn it_returns_the_answer_for_part_two() {
         let input = load_input("./fixtures/input.txt");
-        assert_eq!(0, part_two(&input));
+        assert_eq!(26499773, part_two(&input));
     }
 }
