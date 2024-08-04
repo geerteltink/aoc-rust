@@ -1,6 +1,6 @@
 [package]
 name = "aoc"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,10 +8,10 @@ edition = "2021"
 [dependencies]
 debug_print = "1.0.0"
 defaultmap = "0.6.0"
-derive_more = "0.99.17"
+derive_more = "0.99.18"
 hashbrown = "0.14.5"
 itertools = "0.13.0"
 num = "0.4.3"
-pathfinding = "4.9.1"
+pathfinding = "4.10.0"
 rayon = "1.10.0"
-regex = "1.10.4"
+regex = "1.10.6"
